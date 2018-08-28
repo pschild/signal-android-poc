@@ -19,15 +19,18 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Class that wraps signal specific methods.
+ */
 public class SignalWrapper {
 
     public SignalUser register(String name) throws InvalidKeyException {
         IdentityKeyPair identityKeyPair = KeyHelper.generateIdentityKeyPair();
         int registrationId = KeyHelper.generateRegistrationId(false);
-        SignalProtocolAddress address = new SignalProtocolAddress(name, 0);
+        SignalProtocolAddress address = new SignalProtocolAddress(name, 0); // deviceId is always 0 for the PoC
 
         SignedPreKeyRecord signedPreKey = generateSignedPreKey(identityKeyPair);
-        List<PreKeyRecord> preKeys = generatePreKeys(10);
+        List<PreKeyRecord> preKeys = generatePreKeys(10); // in this case, 10 prekeys will be generated.
 
         SignalProtocolStore store = new InMemorySignalProtocolStore(identityKeyPair, registrationId);
         store.storeSignedPreKey(signedPreKey.getId(), signedPreKey);
@@ -48,7 +51,7 @@ public class SignalWrapper {
 
     private SignedPreKeyRecord generateSignedPreKey(IdentityKeyPair identityKeyPair) throws InvalidKeyException {
         Random rand = new Random();
-        int signedPreKeyId = rand.nextInt(5000);
+        int signedPreKeyId = rand.nextInt(9999);
         return KeyHelper.generateSignedPreKey(identityKeyPair, signedPreKeyId);
     }
 
@@ -75,10 +78,14 @@ public class SignalWrapper {
         byte[] plaintext;
 
         if (ciphertext.getType() == CiphertextMessage.PREKEY_TYPE) {
+            // Decrypt a PreKeyWhisperMessage by first establishing a new session
+            // The session will be set up automatically by libsignal.
+            // The information to do that is delivered within the message's ciphertext.
             preKeySignalMessage = new PreKeySignalMessage(ciphertext.serialize());
             plaintext = sessionCipher.decrypt(preKeySignalMessage);
 
         } else {
+            // Decrypt a normal message using an existing session
             signalMessage = new SignalMessage(ciphertext.serialize());
             plaintext = sessionCipher.decrypt(signalMessage);
 

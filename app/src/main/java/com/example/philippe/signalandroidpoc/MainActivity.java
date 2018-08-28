@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // TextView will be used only for showing the log messages
         outputTextView = (TextView)findViewById(R.id.content);
 
         try {
