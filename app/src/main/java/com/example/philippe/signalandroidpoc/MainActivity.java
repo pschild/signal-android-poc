@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import org.whispersystems.libsignal.SessionCipher;
-import org.whispersystems.libsignal.protocol.CiphertextMessage;
+import org.whispersystems.libsignal.protocol.PreKeySignalMessage;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
         outputTextView.append("\n\n4) Alice: Encrypting message for bob...");
         SessionCipher aliceSc = signalWrapper.createSessionCipher(alice, bob);
-        CiphertextMessage ciphertext = signalWrapper.encrypt(aliceSc, "Hi Bob, this is Alice! How are you?");
-        outputTextView.append("\nEncrypted => " + ciphertext.serialize());
+        PreKeySignalMessage ciphertext = (PreKeySignalMessage) signalWrapper.encrypt(aliceSc, "Hi Bob, this is Alice! How are you?");
+        outputTextView.append("\nEncrypted => " + new String(ciphertext.getWhisperMessage().getBody()));
 
         outputTextView.append("\n\n5) Bob: Decrypting alice's message...");
         SessionCipher bobSc = signalWrapper.createSessionCipher(bob, alice);
@@ -55,8 +55,8 @@ public class MainActivity extends AppCompatActivity {
         outputTextView.append("\nSession started!");
 
         outputTextView.append("\n\n7) Bob: Encrypting message for alice...");
-        ciphertext = signalWrapper.encrypt(bobSc, "Hi Alice, this is Bob! I'm fine!");
-        outputTextView.append("\nEncrypted => " + ciphertext.serialize());
+        ciphertext = (PreKeySignalMessage) signalWrapper.encrypt(bobSc, "Hi Alice, this is Bob! I'm fine!");
+        outputTextView.append("\nEncrypted => " + new String(ciphertext.getWhisperMessage().getBody()));
 
         outputTextView.append("\n\n8) Alice: Decrypting bob's message...");
         plaintext = signalWrapper.decrypt(aliceSc, ciphertext);
